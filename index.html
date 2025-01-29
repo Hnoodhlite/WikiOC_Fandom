@@ -1,29 +1,180 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OC Fandom</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>HnoodhVerse OC Wiki</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <style>
+        :root {
+            --primary: #6C5B7B;
+            --secondary: #C06C84;
+            --background: #f0f0f0;
+            --text: #333;
+        }
+
+        /* Loading Screen */
+        #loader {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: #2A363B;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        /* Dark Mode */
+        .dark-mode {
+            --background: #1a1a1a;
+            --text: #fff;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            transition: 0.5s;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+        }
+
+        .theme-btn {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            background: var(--primary);
+            color: white;
+        }
+
+        nav {
+            background: var(--primary);
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .character-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 1rem;
+            transition: transform 0.3s;
+        }
+
+        .character-card:hover {
+            transform: translateY(-5px);
+        }
+
+        #admin-login {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--background);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to OC Fandom</h1>
-        <p>Your hub for amazing original characters (OCs).</p>
-    </header>
-    <main>
-        <div class="oc-list">
-            <!-- Placeholder for dynamic content -->
-            <div class="oc-item">
-                <img src="images/default.jpg" alt="Character Image">
-                <h2>Character Name</h2>
-                <p>Character description goes here...</p>
-            </div>
+    <!-- Loading Screen -->
+    <div id="loader">
+        <canvas id="mikuCanvas"></canvas>
+        <h2>جاري التحميل...</h2>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content" style="display:none;">
+        <button class="theme-btn" onclick="toggleTheme()">🌓</button>
+        
+        <nav>
+            <h1>HnoodhVerse OC Wiki</h1>
+        </nav>
+
+        <div class="character-card">
+            <h2>الشخصية الأولى</h2>
+            <p>وصف الشخصية هنا...</p>
+            <div class="3d-model"></div>
         </div>
-    </main>
-    <footer>
-        <p>Developed by Hnoodhlite &copy; 2025</p>
+
+        <!-- Admin Panel -->
+        <button onclick="showAdmin()">الدخول كأدمن</button>
+        <div id="admin-login">
+            <input type="password" id="adminPass">
+            <button onclick="checkAdmin()">تأكيد</button>
+        </div>
+    </div>
+
+    <footer style="text-align:center; padding:2rem;">
+        <p>© 2024 hnoodhlite. جميع الحقوق محفوظة</p>
     </footer>
+
+    <script>
+        // Loading Screen with Miku 3D Model
+        let mixer;
+        const loader = new THREE.GLTFLoader();
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({canvas: document.querySelector('#mikuCanvas')});
+
+        loader.load('https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/models/gltf/Parrot.gltf', (gltf) => {
+            scene.add(gltf.scene);
+            mixer = new THREE.AnimationMixer(gltf.scene);
+            gltf.animations.forEach((clip) => {
+                mixer.clipAction(clip).play();
+            });
+        });
+
+        camera.position.z = 5;
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            if (mixer) mixer.update(0.01);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Hide loader after 5 seconds
+        setTimeout(() => {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        }, 5000);
+
+        // Theme Management
+        const themes = ['default', 'dark', 'pastel'];
+        let currentTheme = 0;
+
+        function toggleTheme() {
+            currentTheme = (currentTheme + 1) % themes.length;
+            document.body.className = themes[currentTheme];
+        }
+
+        // Admin Panel
+        function showAdmin() {
+            document.getElementById('admin-login').style.display = 'block';
+        }
+
+        function checkAdmin() {
+            if(document.getElementById('adminPass').value === 'hnoodh123') {
+                window.location.href = 'admin.html';
+            }
+        }
+
+        // Anime.js Animations
+        anime({
+            targets: '.character-card',
+            opacity: [0, 1],
+            delay: anime.stagger(100),
+            duration: 1000
+        });
+    </script>
 </body>
 </html>
