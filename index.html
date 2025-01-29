@@ -1,180 +1,247 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>HnoodhVerse OC Wiki</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>OC Universe | الإبداع بلا حدود</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@firebase/app@8.10.0/dist/index.esm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@firebase/database@8.10.0/dist/index.esm.js"></script>
     <style>
         :root {
-            --primary: #6C5B7B;
-            --secondary: #C06C84;
-            --background: #f0f0f0;
-            --text: #333;
+            --primary: hsl(265, 89%, 70%);
+            --bg: #0f0f1f;
+            --text: #ffffff;
+            --accent: #00ff9d;
+            --glass: rgba(255, 255, 255, 0.05);
         }
 
-        /* Loading Screen */
-        #loader {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            background: #2A363B;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-
-        /* Dark Mode */
-        .dark-mode {
-            --background: #1a1a1a;
-            --text: #fff;
+        /* نظام أساسي متجاوب */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: var(--background);
+            background: var(--bg);
             color: var(--text);
-            transition: 0.5s;
-            font-family: 'Arial', sans-serif;
-            margin: 0;
+            font-family: 'Tajawal', sans-serif;
+            line-height: 1.6;
+            overscroll-behavior: none;
         }
 
-        .theme-btn {
-            position: fixed;
-            right: 20px;
-            top: 20px;
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            background: var(--primary);
-            color: white;
-        }
-
-        nav {
-            background: var(--primary);
+        /* شريط التنقل الذكي */
+        .main-nav {
+            position: sticky;
+            top: 0;
+            background: var(--bg);
             padding: 1rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--accent);
         }
 
+        /* تصميم البطاقات السحري */
         .character-card {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 1rem;
+            background: var(--glass);
+            border-radius: 20px;
+            padding: 1.5rem;
             margin: 1rem;
-            transition: transform 0.3s;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--accent);
+            transform: translateY(0);
+            transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .character-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 157, 0.1);
         }
 
-        #admin-login {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--background);
+        /* نموذج النشر التفاعلي */
+        .publish-form {
+            max-width: 800px;
+            margin: 2rem auto;
             padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            background: var(--glass);
+            border-radius: 20px;
+        }
+
+        /* نظام الثيمات المتقدم */
+        .theme-switcher {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .theme-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* أنيميشن الدخول */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* تصميم متجاوب للجوال */
+        @media (max-width: 768px) {
+            .character-card {
+                margin: 1rem 0;
+                border-radius: 15px;
+            }
+
+            .publish-form {
+                padding: 1rem;
+                margin: 1rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loader">
-        <canvas id="mikuCanvas"></canvas>
-        <h2>جاري التحميل...</h2>
+    <!-- شاشة التحميل -->
+    <div class="loader-screen">
+        <div class="loading-spinner"></div>
     </div>
 
-    <!-- Main Content -->
-    <div id="content" style="display:none;">
-        <button class="theme-btn" onclick="toggleTheme()">🌓</button>
-        
-        <nav>
-            <h1>HnoodhVerse OC Wiki</h1>
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+        <nav class="main-nav">
+            <h1 class="logo">OC Universe</h1>
+            <button class="publish-trigger">نشر شخصية جديدة ✨</button>
         </nav>
 
-        <div class="character-card">
-            <h2>الشخصية الأولى</h2>
-            <p>وصف الشخصية هنا...</p>
-            <div class="3d-model"></div>
+        <!-- نموذج النشر -->
+        <form class="publish-form" id="publishForm">
+            <div class="3d-preview"></div>
+            <input type="text" class="form-input" placeholder="اسم الشخصية" required>
+            <textarea class="form-textarea" placeholder="القصة..." rows="5" required></textarea>
+            <button type="submit" class="submit-btn">النشر الآن 🚀</button>
+        </form>
+
+        <!-- معرض الشخصيات -->
+        <section class="characters-grid" id="charactersGrid"></section>
+
+        <!-- لوحة التحكم المخفية -->
+        <div class="admin-panel">
+            <div class="admin-content"></div>
         </div>
+    </main>
 
-        <!-- Admin Panel -->
-        <button onclick="showAdmin()">الدخول كأدمن</button>
-        <div id="admin-login">
-            <input type="password" id="adminPass">
-            <button onclick="checkAdmin()">تأكيد</button>
-        </div>
-    </div>
+<script>
+// نظام التهيئة
+document.addEventListener('DOMContentLoaded', () => {
+    // تهيئة Firebase
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT.firebaseapp.com",
+        databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+        projectId: "YOUR_PROJECT",
+        storageBucket: "YOUR_PROJECT.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
 
-    <footer style="text-align:center; padding:2rem;">
-        <p>© 2024 hnoodhlite. جميع الحقوق محفوظة</p>
-    </footer>
+    // إدارة الحالة
+    let currentUser = null;
+    let characters = [];
 
-    <script>
-        // Loading Screen with Miku 3D Model
-        let mixer;
-        const loader = new THREE.GLTFLoader();
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({canvas: document.querySelector('#mikuCanvas')});
+    // نظام المصادقة
+    firebase.auth().onAuthStateChanged(user => {
+        currentUser = user;
+        togglePublishForm(user);
+    });
 
-        loader.load('https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/models/gltf/Parrot.gltf', (gltf) => {
-            scene.add(gltf.scene);
-            mixer = new THREE.AnimationMixer(gltf.scene);
-            gltf.animations.forEach((clip) => {
-                mixer.clipAction(clip).play();
-            });
-        });
-
-        camera.position.z = 5;
+    // وظيفة النشر
+    document.getElementById('publishForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const characterData = {
+            name: formData.get('name'),
+            story: formData.get('story'),
+            author: currentUser?.uid || 'مجهول',
+            timestamp: Date.now()
+        };
         
-        function animate() {
-            requestAnimationFrame(animate);
-            if (mixer) mixer.update(0.01);
-            renderer.render(scene, camera);
+        try {
+            await firebase.database().ref('characters').push(characterData);
+            loadCharacters();
+        } catch (error) {
+            showError('حدث خطأ في النشر');
         }
-        animate();
+    });
 
-        // Hide loader after 5 seconds
-        setTimeout(() => {
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('content').style.display = 'block';
-        }, 5000);
+    // تحميل الشخصيات
+    async function loadCharacters() {
+        const snapshot = await firebase.database().ref('characters').once('value');
+        characters = snapshot.val() || [];
+        renderCharacters();
+    }
 
-        // Theme Management
-        const themes = ['default', 'dark', 'pastel'];
-        let currentTheme = 0;
+    // عرض الشخصيات
+    function renderCharacters() {
+        const grid = document.getElementById('charactersGrid');
+        grid.innerHTML = characters.map(character => `
+            <div class="character-card">
+                <h3>${character.name}</h3>
+                <p>${character.story}</p>
+                <div class="character-meta">
+                    <span>${new Date(character.timestamp).toLocaleDateString()}</span>
+                </div>
+            </div>
+        `).join('');
+    }
 
-        function toggleTheme() {
-            currentTheme = (currentTheme + 1) % themes.length;
-            document.body.className = themes[currentTheme];
-        }
+    // نظام الثيمات
+    const themes = {
+        dark: { bg: '#0f0f1f', text: '#fff' },
+        light: { bg: '#f8f9fa', text: '#333' },
+        green: { bg: '#00220b', text: '#00ff9d' }
+    };
 
-        // Admin Panel
-        function showAdmin() {
-            document.getElementById('admin-login').style.display = 'block';
-        }
-
-        function checkAdmin() {
-            if(document.getElementById('adminPass').value === 'hnoodh123') {
-                window.location.href = 'admin.html';
-            }
-        }
-
-        // Anime.js Animations
-        anime({
-            targets: '.character-card',
-            opacity: [0, 1],
-            delay: anime.stagger(100),
-            duration: 1000
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const theme = btn.dataset.theme;
+            document.documentElement.style.setProperty('--bg', themes[theme].bg);
+            document.documentElement.style.setProperty('--text', themes[theme].text);
         });
-    </script>
+    });
+
+    // نظام الإدارة السري
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+    let inputSequence = [];
+    
+    document.addEventListener('keydown', (e) => {
+        inputSequence.push(e.key);
+        if (inputSequence.slice(-konamiCode.length).join('') === konamiCode.join('')) {
+            showAdminPanel();
+            inputSequence = [];
+        }
+    });
+});
+
+// وظائف المساعدة
+function togglePublishForm(user) {
+    const form = document.getElementById('publishForm');
+    form.style.display = user ? 'block' : 'none';
+}
+
+function showAdminPanel() {
+    // تنفيذ لوحة التحكم
+}
+</script>
 </body>
 </html>
