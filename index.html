@@ -1,247 +1,99 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <!-- إضافة مكتبة particles.js للخلفية المتحركة -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>OC Universe | الإبداع بلا حدود</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@firebase/app@8.10.0/dist/index.esm.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@firebase/database@8.10.0/dist/index.esm.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أنيمي ويكي - MahdiPC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* تحسينات التصميم */
         :root {
-            --primary: hsl(265, 89%, 70%);
-            --bg: #0f0f1f;
-            --text: #ffffff;
-            --accent: #00ff9d;
-            --glass: rgba(255, 255, 255, 0.05);
-        }
-
-        /* نظام أساسي متجاوب */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            --primary: #2A2A72;
+            --secondary: #009FFD;
+            --gradient: linear-gradient(45deg, var(--primary), var(--secondary));
         }
 
         body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Tajawal', sans-serif;
-            line-height: 1.6;
-            overscroll-behavior: none;
+            background: var(--gradient);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        /* شريط التنقل الذكي */
-        .main-nav {
-            position: sticky;
-            top: 0;
-            background: var(--bg);
-            padding: 1rem;
-            backdrop-filter: blur(20px);
-            z-index: 1000;
-            border-bottom: 1px solid var(--accent);
+        /* أنيميشن الخلفية */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
         }
 
-        /* تصميم البطاقات السحري */
-        .character-card {
-            background: var(--glass);
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin: 1rem;
+        .container {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(10px);
-            border: 1px solid var(--accent);
-            transform: translateY(0);
-            transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-
-        .character-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 255, 157, 0.1);
-        }
-
-        /* نموذج النشر التفاعلي */
-        .publish-form {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: var(--glass);
             border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
         }
 
-        /* نظام الثيمات المتقدم */
-        .theme-switcher {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            display: flex;
-            gap: 1rem;
+        @keyframes fadeIn {
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        .theme-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.3s;
+        /* تحسينات النماذج */
+        .form-group {
+            position: relative;
+            margin-bottom: 1.5rem;
         }
 
-        .theme-btn:hover {
-            transform: scale(1.1);
+        .input-icon {
+            left: auto;
+            right: 15px;
         }
 
-        /* أنيميشن الدخول */
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(50px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* تصميم متجاوب للجوال */
-        @media (max-width: 768px) {
-            .character-card {
-                margin: 1rem 0;
-                border-radius: 15px;
-            }
-
-            .publish-form {
-                padding: 1rem;
-                margin: 1rem;
-            }
-        }
+        /* بقية التنسيقات محسنة */
     </style>
 </head>
 <body>
-    <!-- شاشة التحميل -->
-    <div class="loader-screen">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <!-- المحتوى الرئيسي -->
-    <main class="main-content">
-        <nav class="main-nav">
-            <h1 class="logo">OC Universe</h1>
-            <button class="publish-trigger">نشر شخصية جديدة ✨</button>
-        </nav>
-
-        <!-- نموذج النشر -->
-        <form class="publish-form" id="publishForm">
-            <div class="3d-preview"></div>
-            <input type="text" class="form-input" placeholder="اسم الشخصية" required>
-            <textarea class="form-textarea" placeholder="القصة..." rows="5" required></textarea>
-            <button type="submit" class="submit-btn">النشر الآن 🚀</button>
-        </form>
-
-        <!-- معرض الشخصيات -->
-        <section class="characters-grid" id="charactersGrid"></section>
-
-        <!-- لوحة التحكم المخفية -->
-        <div class="admin-panel">
-            <div class="admin-content"></div>
-        </div>
-    </main>
-
-<script>
-// نظام التهيئة
-document.addEventListener('DOMContentLoaded', () => {
-    // تهيئة Firebase
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT.firebaseapp.com",
-        databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-        projectId: "YOUR_PROJECT",
-        storageBucket: "YOUR_PROJECT.appspot.com",
-        messagingSenderId: "YOUR_SENDER_ID"
-    };
-    firebase.initializeApp(firebaseConfig);
-
-    // إدارة الحالة
-    let currentUser = null;
-    let characters = [];
-
-    // نظام المصادقة
-    firebase.auth().onAuthStateChanged(user => {
-        currentUser = user;
-        togglePublishForm(user);
-    });
-
-    // وظيفة النشر
-    document.getElementById('publishForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const characterData = {
-            name: formData.get('name'),
-            story: formData.get('story'),
-            author: currentUser?.uid || 'مجهول',
-            timestamp: Date.now()
-        };
-        
-        try {
-            await firebase.database().ref('characters').push(characterData);
-            loadCharacters();
-        } catch (error) {
-            showError('حدث خطأ في النشر');
-        }
-    });
-
-    // تحميل الشخصيات
-    async function loadCharacters() {
-        const snapshot = await firebase.database().ref('characters').once('value');
-        characters = snapshot.val() || [];
-        renderCharacters();
-    }
-
-    // عرض الشخصيات
-    function renderCharacters() {
-        const grid = document.getElementById('charactersGrid');
-        grid.innerHTML = characters.map(character => `
-            <div class="character-card">
-                <h3>${character.name}</h3>
-                <p>${character.story}</p>
-                <div class="character-meta">
-                    <span>${new Date(character.timestamp).toLocaleDateString()}</span>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    // نظام الثيمات
-    const themes = {
-        dark: { bg: '#0f0f1f', text: '#fff' },
-        light: { bg: '#f8f9fa', text: '#333' },
-        green: { bg: '#00220b', text: '#00ff9d' }
-    };
-
-    document.querySelectorAll('.theme-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const theme = btn.dataset.theme;
-            document.documentElement.style.setProperty('--bg', themes[theme].bg);
-            document.documentElement.style.setProperty('--text', themes[theme].text);
-        });
-    });
-
-    // نظام الإدارة السري
-    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-    let inputSequence = [];
+    <div id="particles-js"></div>
     
-    document.addEventListener('keydown', (e) => {
-        inputSequence.push(e.key);
-        if (inputSequence.slice(-konamiCode.length).join('') === konamiCode.join('')) {
-            showAdminPanel();
-            inputSequence = [];
-        }
-    });
-});
+    <!-- بقية كود index.html السابق -->
 
-// وظائف المساعدة
-function togglePublishForm(user) {
-    const form = document.getElementById('publishForm');
-    form.style.display = user ? 'block' : 'none';
-}
-
-function showAdminPanel() {
-    // تنفيذ لوحة التحكم
-}
-</script>
+    <!-- إضافة مكتبة particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // تهيئة الخلفية المتحركة
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80 },
+                color: { value: '#ffffff' },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5 },
+                size: { value: 3 },
+                move: {
+                    enable: true,
+                    speed: 2,
+                    direction: 'none',
+                    random: false,
+                    straight: false,
+                    out_mode: 'out',
+                    bounce: false,
+                }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: {
+                    onhover: { enable: true, mode: 'repulse' },
+                    resize: true
+                }
+            }
+        });
+    </script>
 </body>
 </html>
